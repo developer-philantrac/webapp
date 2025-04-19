@@ -16,20 +16,27 @@
       --subtext-color: #666;
     }
 
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
       font-family: 'Roboto', sans-serif;
       background-color: var(--background);
       color: var(--text-color);
+      height: 100%;
+    }
+
+    body {
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
+      justify-content: flex-start;
     }
 
     .header {
       text-align: center;
       padding: 32px 16px 16px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .header h1 {
@@ -47,23 +54,23 @@
     #checkout-container {
       background-color: var(--container-bg);
       width: 100%;
-      max-width: 480px;
-      margin: 16px;
-      padding: 20px;
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 16px;
       border-radius: 12px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
       box-sizing: border-box;
+      min-height: 500px;
     }
 
     .error-message {
       text-align: center;
       font-size: 16px;
       color: #d9534f;
-      margin: 40px 16px 20px;
+      padding: 24px 12px;
     }
 
     .close-button {
-      display: inline-block;
       margin-top: 16px;
       background-color: var(--primary);
       color: white;
@@ -89,8 +96,14 @@
       }
 
       #checkout-container {
-        margin: 8px;
-        padding: 16px;
+        margin: 12px;
+        padding: 12px;
+        min-height: 400px;
+      }
+
+      .close-button {
+        font-size: 13px;
+        padding: 10px 16px;
       }
     }
   </style>
@@ -114,8 +127,7 @@
     if (!clientSecret) {
       container.innerHTML = `
         <div class="error-message">
-          Something went wrong. Please try again later.
-          <br />
+          ⚠️ Something went wrong. Please try again later.<br/>
           <button class="close-button" onclick="window.close()">Close Window</button>
         </div>
       `;
@@ -126,8 +138,7 @@
         console.error('Stripe Checkout error:', error);
         container.innerHTML = `
           <div class="error-message">
-            Unable to load payment form. Please try again later.
-            <br />
+            ❌ Unable to load payment form. Please try again later.<br/>
             <button class="close-button" onclick="window.close()">Close Window</button>
           </div>
         `;
