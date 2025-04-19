@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Complete Your Payment – Philantrac</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3/"></script>
+  <!-- Roboto font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #117946;
+      --secondary: #ff8c2e;
+      --background: #fafafa;
+      --container-bg: #ffffff;
+      --text-color: #222;
+      --subtext-color: #666;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .header {
+      text-align: center;
+      padding: 32px 16px 16px;
+    }
+
+    .header h1 {
+      color: var(--primary);
+      font-size: 26px;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: var(--subtext-color);
+      font-size: 16px;
+      margin: 0;
+    }
+
+    #checkout-container {
+      background-color: var(--container-bg);
+      width: 100%;
+      max-width: 480px;
+      margin: 16px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 22px;
+      }
+
+      .header p {
+        font-size: 14px;
+      }
+
+      #checkout-container {
+        margin: 8px;
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>Complete Your Donation</h1>
+    <p>You're just one step away from making an impact</p>
+  </div>
+
+  <div id="checkout-container"></div>
+
+  <script>
+    const stripe = Stripe('pk_test_51QpxmvLuSJ6SZh9b6mW4vZTkGaMvBLzJvZUGcm9w8AjsjWb6eppnxguqxn8foeziwTpz0DdzOnnFWo6rRJ396HWR00HLjnhIQO');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const clientSecret = urlParams.get('secret');
+
+    if (!clientSecret) {
+      document.getElementById("checkout-container").innerHTML =
+        "<p style='color: red;'>Missing client secret in URL. Please contact support.</p>";
+    } else {
+      stripe.initEmbeddedCheckout({ clientSecret }).then(checkout => {
+        checkout.mount('#checkout-container');
+      }).catch(error => {
+        console.error('Stripe Checkout error:', error);
+        document.getElementById("checkout-container").innerHTML =
+          "<p style='color: red;'>Failed to initialize payment. Please try again.</p>";
+      });
+    }
+  </script>
+</body>
+</html>
