@@ -2,120 +2,80 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Complete Your Payment – Philantrac</title>
+  <title>Philantrac – Checkout</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://js.stripe.com/v3/"></script>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
   <style>
-    :root {
-      --primary: #117946;
-      --secondary: #ff8c2e;
-      --background: #fafafa;
-      --container-bg: #ffffff;
-      --text-color: #222;
-      --subtext-color: #666;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Roboto', sans-serif;
-      background-color: var(--background);
-      color: var(--text-color);
-      height: 100%;
-    }
-
     body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #fafafa;
+      color: #222;
+    }
+
+    .wrapper {
+      max-width: 500px;
+      margin: auto;
+      padding: 24px;
+      box-sizing: border-box;
     }
 
     .header {
       text-align: center;
-      padding: 32px 16px 16px;
-      width: 100%;
-      box-sizing: border-box;
+      margin-bottom: 20px;
     }
 
     .header h1 {
-      color: var(--primary);
-      font-size: 26px;
+      font-size: 24px;
+      color: #117946;
       margin-bottom: 8px;
     }
 
     .header p {
-      color: var(--subtext-color);
-      font-size: 16px;
+      font-size: 15px;
+      color: #666;
       margin: 0;
     }
 
     #checkout-container {
-      background-color: var(--container-bg);
-      width: 100%;
-      max-width: 500px;
-      margin: 20px auto;
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-      box-sizing: border-box;
-      min-height: 500px;
+      min-height: 300px;
     }
 
-    .error-message {
+    #error-message {
       text-align: center;
+      margin-top: 20px;
       font-size: 16px;
       color: #d9534f;
-      padding: 24px 12px;
+      display: none;
     }
 
-    .close-button {
-      margin-top: 16px;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 12px 20px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
+    @media (max-width: 500px) {
+      .wrapper {
+        padding: 16px;
+      }
 
-    .close-button:hover {
-      background-color: #0d5e34;
-    }
-
-    @media (max-width: 480px) {
       .header h1 {
-        font-size: 22px;
+        font-size: 20px;
       }
 
       .header p {
         font-size: 14px;
-      }
-
-      #checkout-container {
-        margin: 12px;
-        padding: 12px;
-        min-height: 400px;
-      }
-
-      .close-button {
-        font-size: 13px;
-        padding: 10px 16px;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="header">
-    <h1>Complete Your Donation</h1>
-    <p>You're just one step away from making an impact</p>
-  </div>
+  <div class="wrapper">
+    <div class="header">
+      <h1>Complete Your Payment</h1>
+      <p>You're almost done!</p>
+    </div>
 
-  <div id="checkout-container"></div>
+    <div id="checkout-container"></div>
+    <div id="error-message">⚠️ Unable to load checkout. Please try again.</div>
+  </div>
 
   <script>
     const stripe = Stripe('pk_test_51QpxmvLuSJ6SZh9b6mW4vZTkGaMvBLzJvZUGcm9w8AjsjWb6eppnxguqxn8foeziwTpz0DdzOnnFWo6rRJ396HWR00HLjnhIQO');
@@ -123,25 +83,20 @@
     const clientSecret = urlParams.get('secret');
 
     const container = document.getElementById("checkout-container");
+    const errorMessage = document.getElementById("error-message");
 
     if (!clientSecret) {
-      container.innerHTML = `
-        <div class="error-message">
-          ⚠️ Something went wrong. Please try again later.<br/>
-          <button class="close-button" onclick="window.close()">Close Window</button>
-        </div>
-      `;
+      errorMessage.textContent = "⚠️ Missing client secret. Please try again.";
+      errorMessage.style.display = "block";
     } else {
       stripe.initEmbeddedCheckout({ clientSecret }).then(checkout => {
+        // If it mounts successfully, hide error message
+        errorMessage.style.display = "none";
         checkout.mount('#checkout-container');
       }).catch(error => {
-        console.error('Stripe Checkout error:', error);
-        container.innerHTML = `
-          <div class="error-message">
-            ❌ Unable to load payment form. Please try again later.<br/>
-            <button class="close-button" onclick="window.close()">Close Window</button>
-          </div>
-        `;
+        console.error('Stripe init error:', error);
+        errorMessage.textContent = "❌ Failed to load payment form. Please refresh or try again later.";
+        errorMessage.style.display = "block";
       });
     }
   </script>
