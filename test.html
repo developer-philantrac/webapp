@@ -1,37 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Philantrac – Onboarding (Debug)</title>
+  <meta charset="utf-8" />
+  <title>Philantrac – Onboarding</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://connect-js.stripe.com/v1.0/connect.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --primary: #186d40;
+      --secondary: #ff8c2e;
+      --primary-text: #222222;
+      --secondary-text: #888888;
+      --primary-bg: #fafafa;
+      --secondary-bg: #ffffff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary: #186d40;
+        --secondary: #ff8c2e;
+        --primary-text: #ffffff;
+        --secondary-text: #95a1ac;
+        --primary-bg: #1d2428;
+        --secondary-bg: #14181b;
+      }
+    }
+
     body {
       font-family: 'Roboto', sans-serif;
       margin: 0;
       padding: 30px;
-      background-color: #fafafa;
-      color: #444;
+      background-color: var(--primary-bg);
+      color: var(--secondary-text);
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
+
     #container {
       max-width: 600px;
       margin: auto;
       padding: 20px;
-      background: white;
+      background: var(--secondary-bg);
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
+
     #loading {
       text-align: center;
       font-size: 18px;
       padding: 40px;
-      color: #117946;
     }
+
     #error {
       color: red;
-      padding-top: 20px;
       text-align: center;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -43,50 +67,74 @@
   </div>
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const clientSecret = urlParams.get("client_secret");
-    const publishableKey = "pk_test_51QpxmvLuSJ6SZh9bRzI5rRwkxSV0QdQSo3lZdOcmeCuqJcHrKgrm0tGPJx2d9oCcptzcT0MO3YzFFiFdpknLGtjS00YIsOEmNn";
-
-    const showError = (msg) => {
-      document.getElementById("error").innerText = msg;
-      console.error("🛑 " + msg);
-    };
-
-    const log = (...args) => console.log("🧪", ...args);
-
     window.addEventListener("load", () => {
-      const waitForStripeConnect = (callback) => {
-        const interval = setInterval(() => {
-          if (window.StripeConnect && typeof StripeConnect.init === 'function') {
-            clearInterval(interval);
-            callback();
-          }
-        }, 50);
-        setTimeout(() => {
-          clearInterval(interval);
-          showError("Timeout: StripeConnect not available.");
-        }, 5000);
+      const urlParams = new URLSearchParams(window.location.search);
+      const clientSecret = urlParams.get("client_secret"); // ✅ fixed param name
+      const publishableKey = "pk_test_51QpxmvLuSJ6SZh9bRzI5rRwkxSV0QdQSo3lZdOcmeCuqJcHrKgrm0tGPJx2d9oCcptzcT0MO3YzFFiFdpknLGtjS00YIsOEmNn";
+
+      const showError = (message) => {
+        document.getElementById("error").innerText = message;
+        console.error("🛑", message);
       };
 
-      waitForStripeConnect(() => {
-        log("StripeConnect is ready.");
-        log("Publishable Key:", publishableKey);
-        log("Client Secret from URL:", clientSecret);
+      if (!clientSecret) {
+        showError("Missing client_secret in URL.");
+        return;
+      }
 
-        if (!clientSecret) {
-          showError("Missing client secret in URL.");
+      const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      try {
+        const stripeConnectInstance = StripeConnect.init({
+          publishableKey,
+          fetchClientSecret: () => Promise.resolve(clientSecret),
+          appearance: {
+            variables: {
+              colorPrimary: "#186d40",
+              colorText: isDarkMode ? "#95a1ac" : "#888888",
+              borderRadius: "8px",
+              fontFamily: "Roboto, sans-serif",
+            },
+            rules: {
+              ".Tab, .Button, .Link": {
+                color: "#186d40",
+              },
+              ".Button--primary": {
+                backgroundColor: "#186d40",
+                color: "#ffffff",
+              },
+              ".Input": {
+                borderColor: "#186d40",
+                color: isDarkMode ? "#95a1ac" : "#888888",
+              }
+            }
+          }
+        });
+
+        const onboarding = stripeConnectInstance.create("account-onboarding");
+
+        if (!onboarding || typeof onboarding.mount !== "function") {
+          showError("Onboarding component is invalid or not mountable.");
           return;
         }
 
-        try {
-          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        onboarding.setOnExit(() => {
+          console.log("User exited onboarding");
+        });
 
-          const stripeConnectInstance = StripeConnect.init({
-            publishableKey,
-            fetchClientSecret: () => Promise.resolve(clientSecret),
-            appearance: {
-              variables: {
-                colorPrimary: "#186d40",
-                colorText: isDarkMode ? "#95a1ac" : "#888888",
-                borderRadius: "8px",
-                font
+        onboarding.setOnStepChange((stepChange) => {
+          console.log("User entered step:", stepChange.step);
+        });
+
+        const container = document.getElementById("container");
+        container.innerHTML = ""; // Clear loading message
+        onboarding.mount("#container"); // ✅ using mount instead of appendChild
+        console.log("✅ Onboarding form mounted.");
+      } catch (error) {
+        showError("Failed to load onboarding form.");
+        console.error("❌", error);
+      }
+    });
+  </script>
+</body>
+</html>
