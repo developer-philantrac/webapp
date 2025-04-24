@@ -69,7 +69,7 @@
   <script>
     window.addEventListener("load", () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const clientSecret = urlParams.get("client_secret"); // ✅ fixed param name
+      const clientSecret = urlParams.get("client_secret");
       const publishableKey = "pk_test_51QpxmvLuSJ6SZh9bRzI5rRwkxSV0QdQSo3lZdOcmeCuqJcHrKgrm0tGPJx2d9oCcptzcT0MO3YzFFiFdpknLGtjS00YIsOEmNn";
 
       const showError = (message) => {
@@ -94,19 +94,6 @@
               colorText: isDarkMode ? "#95a1ac" : "#888888",
               borderRadius: "8px",
               fontFamily: "Roboto, sans-serif",
-            },
-            rules: {
-              ".Tab, .Button, .Link": {
-                color: "#186d40",
-              },
-              ".Button--primary": {
-                backgroundColor: "#186d40",
-                color: "#ffffff",
-              },
-              ".Input": {
-                borderColor: "#186d40",
-                color: isDarkMode ? "#95a1ac" : "#888888",
-              }
             }
           }
         });
@@ -119,16 +106,16 @@
         }
 
         onboarding.setOnExit(() => {
-          console.log("User exited onboarding");
+          console.log("🚪 User exited onboarding");
         });
 
         onboarding.setOnStepChange((stepChange) => {
-          console.log("User entered step:", stepChange.step);
+          console.log("➡️ Step changed:", stepChange.step);
         });
 
         const container = document.getElementById("container");
         container.innerHTML = ""; // Clear loading message
-        onboarding.mount("#container"); // ✅ using mount instead of appendChild
+        onboarding.mount("#container"); // ✅ Correct usage
         console.log("✅ Onboarding form mounted.");
       } catch (error) {
         showError("Failed to load onboarding form.");
