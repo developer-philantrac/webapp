@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <title>Philantrac – Onboarding (Debug)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://connect-js.stripe.com/v1.0/connect.js" async></script>
+  <script src="https://connect-js.stripe.com/v1.0/connect.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
   <style>
     body {
@@ -35,6 +35,7 @@
     }
   </style>
 </head>
+
 <body>
   <div id="container">
     <div id="loading">Loading onboarding form...</div>
@@ -43,7 +44,7 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const clientSecret = urlParams.get('client_secret');
+    const clientSecret = urlParams.get("client_secret");
     const publishableKey = "pk_test_51QpxmvLuSJ6SZh9bRzI5rRwkxSV0QdQSo3lZdOcmeCuqJcHrKgrm0tGPJx2d9oCcptzcT0MO3YzFFiFdpknLGtjS00YIsOEmNn";
 
     const showError = (msg) => {
@@ -88,48 +89,4 @@
                 colorPrimary: "#186d40",
                 colorText: isDarkMode ? "#95a1ac" : "#888888",
                 borderRadius: "8px",
-                fontFamily: "Roboto, sans-serif",
-              },
-              rules: {
-                ".Tab, .Button, .Link": {
-                  color: "#186d40",
-                },
-                ".Button--primary": {
-                  backgroundColor: "#186d40",
-                  color: "#ffffff",
-                },
-                ".Input": {
-                  borderColor: "#186d40",
-                  color: isDarkMode ? "#95a1ac" : "#888888",
-                }
-              }
-            }
-          });
-
-          log("Initialized StripeConnect instance:", stripeConnectInstance);
-
-          const onboarding = stripeConnectInstance.create("account-onboarding");
-
-          if (!onboarding || typeof onboarding.mount !== "function") {
-            showError("Onboarding component is invalid or not mountable.");
-            log("onboarding returned:", onboarding);
-            return;
-          }
-
-          onboarding.setOnExit(() => log("User exited onboarding."));
-          onboarding.setOnStepChange((stepChange) => log("Step changed:", stepChange));
-
-          const container = document.getElementById("container");
-          container.innerHTML = ""; // Clear previous content
-          container.appendChild(onboarding);
-
-          log("✅ Onboarding appended successfully.");
-        } catch (error) {
-          showError("Failed to load onboarding form.");
-          console.error("Exception during onboarding load:", error);
-        }
-      });
-    });
-  </script>
-</body>
-</html>
+                font
