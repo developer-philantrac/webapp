@@ -1,69 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Philantrac – Onboarding</title>
+  <meta charset="UTF-8" />
+  <title>Onboarding</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://connect-js.stripe.com/v1.0/connect.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --primary: #186d40;
-      --secondary: #ff8c2e;
-      --primary-text: #222222;
-      --secondary-text: #888888;
-      --primary-bg: #fafafa;
-      --secondary-bg: #ffffff;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --primary: #186d40;
-        --secondary: #ff8c2e;
-        --primary-text: #ffffff;
-        --secondary-text: #95a1ac;
-        --primary-bg: #1d2428;
-        --secondary-bg: #14181b;
-      }
-    }
-
-    body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding: 30px;
-      background-color: var(--primary-bg);
-      color: var(--secondary-text);
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    #container {
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
-      background: var(--secondary-bg);
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    #loading {
-      text-align: center;
-      font-size: 18px;
-      padding: 40px;
-    }
-
-    #error {
-      color: red;
-      text-align: center;
-      margin-top: 20px;
-    }
-  </style>
 </head>
 
 <body>
   <div id="container">
-    <div id="loading">Loading onboarding form...</div>
-    <div id="error"></div>
+    <p id="loading">Loading onboarding form...</p>
+    <div id="error" style="color:red;"></div>
   </div>
 
   <script>
@@ -72,54 +19,42 @@
       const clientSecret = urlParams.get("client_secret");
       const publishableKey = "pk_test_51QpxmvLuSJ6SZh9bRzI5rRwkxSV0QdQSo3lZdOcmeCuqJcHrKgrm0tGPJx2d9oCcptzcT0MO3YzFFiFdpknLGtjS00YIsOEmNn";
 
-      const showError = (message) => {
-        document.getElementById("error").innerText = message;
-        console.error("🛑", message);
-      };
+      const container = document.getElementById("container");
+      const loading = document.getElementById("loading");
+      const error = document.getElementById("error");
 
       if (!clientSecret) {
-        showError("Missing client_secret in URL.");
+        loading.style.display = "none";
+        error.textContent = "Missing client_secret in URL.";
         return;
       }
 
-      const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
       try {
-        const stripeConnectInstance = StripeConnect.init({
+        const stripeConnect = StripeConnect.init({
           publishableKey,
-          fetchClientSecret: () => Promise.resolve(clientSecret),
-          appearance: {
-            variables: {
-              colorPrimary: "#186d40",
-              colorText: isDarkMode ? "#95a1ac" : "#888888",
-              borderRadius: "8px",
-              fontFamily: "Roboto, sans-serif",
-            }
-          }
+          fetchClientSecret: () => Promise.resolve(clientSecret)
         });
 
-        const onboarding = stripeConnectInstance.create("account-onboarding");
-
-        if (!onboarding || typeof onboarding.mount !== "function") {
-          showError("Onboarding component is invalid or not mountable.");
-          return;
-        }
+        const onboarding = stripeConnect.create("account-onboarding");
 
         onboarding.setOnExit(() => {
-          console.log("🚪 User exited onboarding");
+          console.log("User exited onboarding.");
         });
 
-        onboarding.setOnStepChange((stepChange) => {
-          console.log("➡️ Step changed:", stepChange.step);
+        onboarding.setOnStepChange((step) => {
+          console.log("Current step:", step);
         });
 
-        const container = document.getElementById("container");
-        container.innerHTML = ""; // Clear loading message
-        onboarding.mount("#container"); // ✅ Correct usage
-        console.log("✅ Onboarding form mounted.");
-      } catch (error) {
-        showError("Failed to load onboarding form.");
-        console.error("❌", error);
+        if (typeof onboarding.mount !== "function") {
+          throw new Error("Onboarding component is not mountable.");
+        }
+
+        loading.remove();
+        onboarding.mount("#container");
+      } catch (err) {
+        loading.style.display = "none";
+        error.textContent = "Failed to load onboarding.";
+        console.error("Onboarding error:", err);
       }
     });
   </script>
