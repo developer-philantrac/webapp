@@ -1,94 +1,89 @@
-(function () {
-  const BASE_URL = "https://www.philantrac.com/charity/";
-
-  window.PhilantracWidget = {
-    iframe: null,
-
-    open: function (slug) {
-      const finalUrl = BASE_URL + encodeURIComponent(slug) + "?checkout=qr";
-      console.log("PhilantracWidget ➜ Opening:", finalUrl);
-
-      // Remove existing modal if present
-      const existingModal = document.getElementById('philantrac-modal');
-      if (existingModal) {
-        document.body.removeChild(existingModal);
-      }
-
-      // Create overlay
-      const overlay = document.createElement('div');
-      overlay.id = 'philantrac-modal';
-      overlay.style = `
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-      `;
-
-      // Modal container
-      const modalContainer = document.createElement('div');
-      modalContainer.style = `
-        width: 90%;
-        height: 90%;
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.2);
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-      `;
-
-      // Iframe with Philantrac checkout
-      const iframe = document.createElement('iframe');
-      iframe.src = finalUrl;
-      iframe.style = `
-        flex-grow: 1;
-        border: none;
-        width: 100%;
-        height: 100%;
-      `;
-
-      // Close button
-      const close = document.createElement('div');
-      close.innerHTML = '&times;';
-      close.style = `
-        position: absolute;
-        top: 12px;
-        right: 20px;
-        font-size: 30px;
-        color: #999;
-        cursor: pointer;
-        z-index: 1;
-      `;
-      close.onclick = () => this.close();
-
-      modalContainer.appendChild(close);
-      modalContainer.appendChild(iframe);
-      overlay.appendChild(modalContainer);
-      document.body.appendChild(overlay);
-
-      this.iframe = overlay;
-    },
-
-    close: function () {
-      const modal = document.getElementById('philantrac-modal');
-      if (modal) {
-        document.body.removeChild(modal);
-        this.iframe = null;
-        console.log("PhilantracWidget ➜ Widget closed.");
-      }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Donation Successful | Philantrac</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9fafb;
+      color: #111827;
+      text-align: center;
+      padding: 50px 20px;
+      margin: 0;
     }
-  };
 
-  // ✅ Listen for donation completion message
-  window.addEventListener('message', function (event) {
-    if (event.data && event.data.type === 'PHILANTRAC_DONATION_COMPLETE') {
-      console.log("PhilantracWidget ➜ Received donation complete message.");
-      window.PhilantracWidget.close();
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-  });
-})();
+
+    .logo {
+      width: 100px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 26px;
+      margin-bottom: 15px;
+      color: #065f46;
+    }
+
+    p {
+      font-size: 16px;
+      margin-bottom: 25px;
+      color: #374151;
+    }
+
+    .button {
+      background-color: #117946;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background-color 0.3s ease;
+    }
+
+    .button:hover {
+      background-color: #ff8c2e;
+    }
+  </style>
+<script>
+  async function postDonationSuccess() {
+    try {
+      await fetch('https://api.philantrac.com/api:MnO0HNOF/Donations_to_Chartiy_Stats_Table_Transfer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    } catch (error) {
+      console.error('Error posting donation success:', error);
+    }
+  }
+
+  window.onload = function() {
+      postDonationSuccess();
+     };
+</script>
+</head>
+
+<body>
+  <div class="container">
+    <img src="https://api.philantrac.com/vault/fv_fq0Cs/vsOKFbe35HXiPL3Rp8CAn8ruB4w/tRIFrA../50x50Logo.svg" alt="Philantrac Logo" class="logo" onerror="this.style.display='none'">
+    <h2>🎉 Thank you for your donation!</h2>
+    <p>You’ll receive a receipt by email shortly.<br>Want to track all your donations and impact?</p>
+    <a href="https://app.philantrac.com" class="button" target="_blank">Join and track all your goodness</a>
+    <p>powered by Philantrac</p>
+  </div>
+</body>
+</html>
